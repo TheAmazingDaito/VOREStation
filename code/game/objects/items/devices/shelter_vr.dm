@@ -3,13 +3,14 @@
 	name = "surfluid sphere"
 	desc = "A glass ball full of inky black fluid. It twitches and shifts as if it were alive. Etched on the outside is some sort of license to use and operate this device on behalf of NanoTrasen."
 	icon = 'icons/obj/device_alt.dmi'
-	icon_state = "powersink0"
+	icon_state = "houseball"
 	origin_tech = list(TECH_MAGNET = 5, TECH_BLUESPACE = 5, TECH_MATERIAL = 5, TECH_ENGINEERING = 5, TECH_DATA = 5)
 
 	var/size = 3 //Interior space, length per inside wall (3 = 3x3 interior, 5x5 footprint). Odd number pls.
 	var/turf/target_turf
 	var/list/turfs_to_goo
 	var/goo_helper
+	var/thrown_dir
 
 	var/goo_type = /obj/item/surfluid_goop
 	var/floor_type = /turf/simulated/shuttle/floor/voidcraft
@@ -21,6 +22,10 @@
 	target_turf = null
 	LAZYCLEARLIST(turfs_to_goo)
 	return ..()
+
+/obj/item/device/shelterball/throw_at(atom/target, range, speed, thrower)
+	. = ..()
+	thrown_dir = get_dir(target,thrower)
 
 // Throwing it deploys it.
 /obj/item/device/shelterball/throw_impact(turf/T, speed)
@@ -51,11 +56,11 @@
 	goo_helper = new goo_type
 
 	PlaceFoundation()
-	sleep(10 SECONDS)
+	sleep(5 SECONDS)
 	PlaceFlooring()
-	sleep(10 SECONDS)
+	sleep(5 SECONDS)
 	PlaceWalls()
-	sleep(10 SECONDS)
+	sleep(5 SECONDS)
 	PlaceDoor()
 
 /obj/item/device/shelterball/proc/PlaceFoundation()
@@ -86,6 +91,10 @@
 	var/outside_edge_start = turfs_to_goo.len - (outside_edge-1)
 	var/length = turfs_to_goo.len //I don't trust for() to not check this every time
 
+	var/datum/effect/effect/system/spark_spread/sparks = new /datum/effect/effect/system/spark_spread()
+	sparks.set_up(5, 1, get_turf(target_turf))
+	sparks.start()
+
 	for(var/i in outside_edge_start to length)
 		sleep(5)
 		var/turf/T = turfs_to_goo[i]
@@ -93,6 +102,8 @@
 			qdel(AM)
 		T.ChangeTurf(wall_type)
 		T.vis_contents -= goo_helper
+		sparks.attach(T)
+		sparks.start()
 
 	//Shuttle walls get prettified
 	for(var/turf/simulated/shuttle/wall/W in turfs_to_goo)
@@ -104,7 +115,7 @@
 /obj/item/device/shelterball/proc/PlaceDoor()
 	var/door_x = target_turf.x
 	var/door_y = target_turf.y
-	var/side = pick(cardinal)
+	var/side = thrown_dir || pick(cardinal)
 	switch(side)
 		if(NORTH)
 			door_y += Floor((size+2)/2)
@@ -122,6 +133,6 @@
 
 /obj/item/surfluid_goop
 	name = "working surface"
-	icon = 'icons/effects/cameravis.dmi'
-	icon_state = "black"
+	icon = 'icons/obj/device_alt.dmi'
+	icon_state = "goofloor"
 	plane = TURF_PLANE
