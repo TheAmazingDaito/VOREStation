@@ -22,7 +22,8 @@
 	var/recharging_time = 0 //time until next dash
 	// var/jumping = FALSE //are we mid-jump? We have no throw_at callback, so we have to check user.throwing.
 
-/obj/item/clothing/shoes/bhop/ui_action_click(mob/user, action)
+/obj/item/clothing/shoes/bhop/ui_action_click()
+	var/mob/living/user = loc
 	if(!isliving(user))
 		return
 
@@ -36,6 +37,6 @@
 	var/atom/target = get_edge_target_turf(user, user.dir) //gets the user's direction
 
 	playsound(src, 'sound/effects/stealthoff.ogg', 50, 1, 1)
-	user.visible_message("<span class='warning'>[usr] dashes forward into the air!</span>")
+	user.visible_message("<span class='warning'>[user] dashes forward into the air!</span>")
 	user.throw_at(target, jumpdistance, jumpspeed)
 	recharging_time = world.time + recharging_rate	
