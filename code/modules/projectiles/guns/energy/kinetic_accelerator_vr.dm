@@ -97,7 +97,7 @@
 	name = "kinetic force"
 	icon = 'icons/obj/projectiles_vr.dmi'
 	icon_state = null
-	damage = 40
+	damage = 32
 	damage_type = BRUTE
 	check_armour = "bomb"
 	kill_count = 3 // Our "range" var is named "kill_count". Yes it is.
